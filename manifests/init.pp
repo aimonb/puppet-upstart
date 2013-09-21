@@ -39,3 +39,29 @@ class upstart {
 
 
 }
+
+define upstart::service(
+  $method,  # 'override' or 'initctl'
+  $autostart  = true,
+){
+  $service = $title
+  if $method == 'override' {
+    file{"/etc/init/${service}.override":
+      ensure  =>  present,
+      mode    =>  '0644',
+      owner   =>  'root',
+      group   =>  'root',
+    }
+    file_line{"disable_${service}":
+      path    =>  "/etc/init/${service}.override",  
+      line    =>  'manual',
+      ensure  =>  $autostart ? {
+                    true  =>  'absent',
+                    false =>  'present',
+                  }
+    }
+  }
+
+
+}
+
